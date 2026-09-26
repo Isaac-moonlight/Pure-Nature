@@ -90,7 +90,7 @@ export const OrderTrackingModal: React.FC<OrderTrackingModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/40 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-gray-900 animate-in fade-in duration-200">
       <div className="bg-white border border-gray-200 max-w-xl w-full rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
@@ -112,23 +112,25 @@ export const OrderTrackingModal: React.FC<OrderTrackingModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-700 rounded-lg transition-colors"
+            className="px-3 py-1.5 bg-white hover:bg-gray-100 text-gray-800 border border-gray-300 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 shadow-xs"
+            title="Retour au menu principal"
           >
-            <X className="w-5 h-5" />
+            <span>Retour au menu</span>
+            <X className="w-4 h-4 ml-1" />
           </button>
         </div>
 
         {/* Content */}
         <div className="p-4 sm:p-6 overflow-y-auto space-y-5">
           {displayOrders.length === 0 ? (
-            <div className="py-12 text-center text-gray-400 space-y-3">
-              <div className="w-16 h-16 mx-auto rounded-full bg-gray-100 flex items-center justify-center text-emerald-700">
-                <Clock className="w-8 h-8 opacity-60" />
+            <div className="py-12 text-center text-gray-500 space-y-3">
+              <div className="w-16 h-16 mx-auto rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700">
+                <Clock className="w-8 h-8 text-emerald-700" />
               </div>
               <p className="font-serif text-lg text-gray-800">
                 Aucune commande active pour le moment
               </p>
-              <p className="text-xs max-w-sm mx-auto text-gray-500">
+              <p className="text-xs max-w-sm mx-auto text-gray-600">
                 Sélectionnez vos plats sur la carte et validez votre panier. Dès validation, la préparation commence instantanément en cuisine !
               </p>
               <div className="pt-2">
@@ -136,7 +138,7 @@ export const OrderTrackingModal: React.FC<OrderTrackingModalProps> = ({
                   onClick={onClose}
                   className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded-xl shadow-xs"
                 >
-                  Découvrir la carte
+                  Retour au Menu & Découvrir la carte
                 </button>
               </div>
             </div>
@@ -301,9 +303,9 @@ export const OrderTrackingModal: React.FC<OrderTrackingModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs sm:text-sm font-semibold rounded-xl transition-colors"
+            className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 active:scale-95 text-white text-xs sm:text-sm font-semibold rounded-xl transition-all shadow-xs flex items-center gap-1.5"
           >
-            Fermer
+            <span>Retour au Menu</span>
           </button>
         </div>
       </div>

@@ -1,0 +1,103 @@
+{
+  "entities": {
+    "Order": {
+      "title": "Order",
+      "description": "Restaurant order placed from table or counter",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique order identifier"
+        },
+        "tableNumber": {
+          "type": "number",
+          "description": "Assigned restaurant table number (1-25)"
+        },
+        "customerName": {
+          "type": "string",
+          "description": "Name of the customer"
+        },
+        "customerPhone": {
+          "type": "string",
+          "description": "Optional contact phone number"
+        },
+        "items": {
+          "type": "array",
+          "description": "List of ordered menu items with quantities and options"
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "Total order amount in FCFA"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "preparing", "ready", "served", "cancelled"],
+          "description": "Kitchen workflow status"
+        },
+        "paymentMethod": {
+          "type": "string",
+          "enum": ["cash_table", "mobile_money", "cashier"],
+          "description": "Selected payment method"
+        },
+        "paymentStatus": {
+          "type": "string",
+          "enum": ["pending", "paid"],
+          "description": "Payment settlement status"
+        },
+        "specialNotes": {
+          "type": "string",
+          "description": "Special preparation instructions or dietary requests"
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Client timestamp when order was submitted"
+        }
+      },
+      "required": ["tableNumber", "customerName", "items", "totalAmount", "status", "paymentMethod"]
+    },
+    "WaiterCall": {
+      "title": "WaiterCall",
+      "description": "Table call for waiter service",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique call identifier"
+        },
+        "tableNumber": {
+          "type": "number",
+          "description": "Calling table number"
+        },
+        "reason": {
+          "type": "string",
+          "enum": ["addition", "eau", "service", "question"],
+          "description": "Reason for the call"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "resolved"],
+          "description": "Call status"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional user note"
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Timestamp when call was sent"
+        }
+      },
+      "required": ["tableNumber", "reason", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Collection of orders for kitchen and service display"
+    },
+    "/waiterCalls/{callId}": {
+      "schema": "WaiterCall",
+      "description": "Collection of waiter assistance calls from tables"
+    }
+  }
+}

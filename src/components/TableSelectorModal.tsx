@@ -29,7 +29,7 @@ export const TableSelectorModal: React.FC<TableSelectorModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 animate-in fade-in duration-200">
       <div className="bg-white border border-gray-200 rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
         {/* Modal Header */}
         <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
@@ -48,9 +48,11 @@ export const TableSelectorModal: React.FC<TableSelectorModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-700 rounded-lg transition-colors"
+            className="px-2.5 py-1 text-xs font-semibold bg-white hover:bg-gray-100 text-gray-800 border border-gray-300 rounded-lg transition-colors flex items-center gap-1 shadow-xs"
+            title="Retour au menu"
           >
-            <X className="w-5 h-5" />
+            <span>Retour</span>
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
 
@@ -91,7 +93,7 @@ export const TableSelectorModal: React.FC<TableSelectorModalProps> = ({
                         : 'bg-white text-gray-800 border-gray-200 hover:bg-gray-50 hover:border-gray-300'
                     }`}
                   >
-                    <span className="text-[10px] uppercase opacity-75">T</span>
+                    <span className="text-[10px] uppercase font-bold text-gray-400">T</span>
                     <span className="text-base font-bold">{tableNum}</span>
                     {isSelected && (
                       <Check className="w-3 h-3 absolute top-1 right-1 stroke-[3]" />

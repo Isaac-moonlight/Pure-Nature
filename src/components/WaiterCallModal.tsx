@@ -67,7 +67,7 @@ export const WaiterCallModal: React.FC<WaiterCallModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900">
       <div className="bg-white border border-gray-200 rounded-2xl max-w-md w-full overflow-hidden shadow-2xl flex flex-col">
         {/* Header */}
         <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
@@ -86,9 +86,11 @@ export const WaiterCallModal: React.FC<WaiterCallModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-700 rounded-lg transition-colors"
+            className="px-2.5 py-1 text-xs font-semibold bg-white hover:bg-gray-100 text-gray-800 border border-gray-300 rounded-lg transition-colors flex items-center gap-1 shadow-xs"
+            title="Retour au menu"
           >
-            <X className="w-5 h-5" />
+            <span>Retour</span>
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
 
@@ -166,7 +168,7 @@ export const WaiterCallModal: React.FC<WaiterCallModalProps> = ({
                 type="button"
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="w-full py-3 bg-emerald-700 hover:bg-emerald-800 active:scale-95 text-white font-semibold rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-xs disabled:opacity-50"
+                className="w-full py-3 bg-emerald-700 hover:bg-emerald-800 active:scale-95 text-white font-semibold rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-xs disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <>

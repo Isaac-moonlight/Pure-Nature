@@ -56,7 +56,7 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/40 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-gray-900 animate-in fade-in duration-200">
       <div className="bg-white border border-gray-200 max-w-xl w-full rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
         {/* Modal Header Image */}
         <div className="relative aspect-[16/8] sm:aspect-[16/7] w-full bg-gray-100 overflow-hidden">
@@ -68,9 +68,11 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
 
           <button
             onClick={onClose}
-            className="absolute top-3 right-3 p-1.5 bg-black/80 hover:bg-black text-white rounded-lg transition-colors z-10"
+            className="absolute top-3 right-3 px-3 py-1.5 bg-black hover:bg-gray-900 text-white rounded-lg text-xs font-semibold transition-colors z-10 flex items-center gap-1 shadow-md"
+            title="Retour au menu"
           >
-            <X className="w-5 h-5" />
+            <span>Retour au menu</span>
+            <X className="w-4 h-4 ml-0.5" />
           </button>
 
           <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between gap-2">
@@ -231,7 +233,7 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
           >
             <ShoppingBag className="w-4 h-4" />
             <span>Ajouter au Panier</span>
-            <span className="font-mono font-bold pl-1 border-l border-white/30 ml-1">
+            <span className="font-mono font-bold pl-2 border-l border-emerald-500 ml-1">
               {formatPrice(totalPrice)}
             </span>
           </button>

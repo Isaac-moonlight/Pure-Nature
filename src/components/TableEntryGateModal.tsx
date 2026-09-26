@@ -20,7 +20,7 @@ export const TableEntryGateModal: React.FC<TableEntryGateModalProps> = ({
   const tables = Array.from({ length: RESTAURANT_INFO.tablesCount }, (_, i) => i + 1);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/40 animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-gray-900 animate-in fade-in duration-300">
       <div className="bg-white border border-gray-200 rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
         {/* Top Header */}
         <div className="p-6 bg-gray-50 border-b border-gray-200 text-center space-y-2 relative">
@@ -68,7 +68,7 @@ export const TableEntryGateModal: React.FC<TableEntryGateModalProps> = ({
                       : 'bg-white text-gray-800 border-gray-200 hover:bg-gray-50 hover:border-gray-300'
                   }`}
                 >
-                  <span className="text-[10px] uppercase font-normal opacity-70">Table</span>
+                  <span className="text-[10px] uppercase font-bold text-gray-400">Table</span>
                   <span>{tableNum}</span>
                   {isSelected && (
                     <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-white"></span>

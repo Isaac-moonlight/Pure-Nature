@@ -70,7 +70,7 @@ export const KitchenPinModal: React.FC<KitchenPinModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900">
       <div className="bg-white border border-gray-200 rounded-2xl max-w-sm w-full overflow-hidden shadow-2xl p-6 text-center space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -82,9 +82,11 @@ export const KitchenPinModal: React.FC<KitchenPinModalProps> = ({
           </span>
           <button
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-700 rounded-lg transition-colors"
+            className="px-2.5 py-1 text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center gap-1"
+            title="Retour au menu"
           >
-            <X className="w-5 h-5" />
+            <span>Retour</span>
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
 
@@ -163,6 +165,17 @@ export const KitchenPinModal: React.FC<KitchenPinModalProps> = ({
             className="h-12 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-mono transition-all flex items-center justify-center border border-gray-200"
           >
             ⌫
+          </button>
+        </div>
+
+        {/* Cancel / Return to Menu Button */}
+        <div className="pt-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-semibold rounded-xl border border-gray-300 transition-colors"
+          >
+            Annuler et Retourner au Menu
           </button>
         </div>
       </div>

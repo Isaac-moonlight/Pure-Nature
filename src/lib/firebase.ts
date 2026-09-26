@@ -11,7 +11,8 @@ import {
   serverTimestamp,
   FirestoreError,
   Unsubscribe,
-  getDocs
+  getDocs,
+  getDocFromServer
 } from 'firebase/firestore';
 import type { Order, WaiterCall, OrderStatus } from '../types';
 import firebaseConfigData from '../../firebase-applet-config.json';
@@ -32,15 +33,36 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 const dbId = (firebaseConfigData as { firestoreDatabaseId?: string }).firestoreDatabaseId;
 export const db = dbId ? getFirestore(app, dbId) : getFirestore(app);
 
-// Local fallback keys & broadcast channel for multi-tab zero-latency sync
-const LOCAL_ORDERS_KEY = 'pn_orders_storage_v2';
-const LOCAL_CALLS_KEY = 'pn_calls_storage_v2';
+// Local fallback keys & broadcast channel for zero-latency instant sync across tabs and windows
+const LOCAL_ORDERS_KEY = 'pn_orders_storage_v3';
+const LOCAL_CALLS_KEY = 'pn_calls_storage_v3';
 
 const broadcastChannel = typeof window !== 'undefined' && 'BroadcastChannel' in window
-  ? new BroadcastChannel('pure_nature_channel')
+  ? new BroadcastChannel('pure_nature_channel_v3')
   : null;
 
-function getLocalOrders(): Order[] {
+// Recursively clean all objects so Firestore never rejects undefined values
+export function cleanForFirestore<T>(data: T): T {
+  if (data === undefined) return null as unknown as T;
+  if (data === null) return null as unknown as T;
+  if (Array.isArray(data)) {
+    return data.map((item) => cleanForFirestore(item)) as unknown as T;
+  }
+  if (typeof data === 'object') {
+    const cleaned: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
+      if (value !== undefined) {
+        cleaned[key] = cleanForFirestore(value);
+      } else {
+        cleaned[key] = '';
+      }
+    }
+    return cleaned as unknown as T;
+  }
+  return data;
+}
+
+export function getLocalOrders(): Order[] {
   try {
     const data = localStorage.getItem(LOCAL_ORDERS_KEY);
     return data ? JSON.parse(data) : [];
@@ -49,7 +71,7 @@ function getLocalOrders(): Order[] {
   }
 }
 
-function saveLocalOrders(orders: Order[]) {
+export function saveLocalOrders(orders: Order[]) {
   try {
     localStorage.setItem(LOCAL_ORDERS_KEY, JSON.stringify(orders));
   } catch {
@@ -57,7 +79,7 @@ function saveLocalOrders(orders: Order[]) {
   }
 }
 
-function getLocalCalls(): WaiterCall[] {
+export function getLocalCalls(): WaiterCall[] {
   try {
     const data = localStorage.getItem(LOCAL_CALLS_KEY);
     return data ? JSON.parse(data) : [];
@@ -66,7 +88,7 @@ function getLocalCalls(): WaiterCall[] {
   }
 }
 
-function saveLocalCalls(calls: WaiterCall[]) {
+export function saveLocalCalls(calls: WaiterCall[]) {
   try {
     localStorage.setItem(LOCAL_CALLS_KEY, JSON.stringify(calls));
   } catch {
@@ -74,7 +96,7 @@ function saveLocalCalls(calls: WaiterCall[]) {
   }
 }
 
-// Dispatches internal event for instant reactivity in same tab
+// Dispatches internal event for instant reactivity across entire app
 function emitLocalUpdate(type: 'orders' | 'calls') {
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent(`pure_nature_${type}_updated`));
@@ -83,20 +105,18 @@ function emitLocalUpdate(type: 'orders' | 'calls') {
 }
 
 /**
- * Real-time listener for all kitchen orders (combines Firestore with zero-latency local/multi-tab sync)
+ * Real-time listener for all kitchen orders (combines Firestore with zero-latency local & multi-tab sync)
  */
 export function subscribeToAllOrders(
   onUpdate: (orders: Order[]) => void
 ): Unsubscribe {
-  let isFirestoreActive = false;
-
-  // Immediate emission from cache so UI never waits
+  // 1. Immediate emission from cache so UI never waits and shows existing orders
   const initial = getLocalOrders();
   if (initial.length > 0) {
     onUpdate(initial);
   }
 
-  // Cross-tab and in-memory listener
+  // 2. In-memory & Cross-tab instant reactivity
   const handleLocalEvent = () => {
     onUpdate(getLocalOrders());
   };
@@ -118,17 +138,16 @@ export function subscribeToAllOrders(
     };
   }
 
-  // Firestore onSnapshot (query without mandatory composite index to prevent indexing issues)
+  // 3. Firestore onSnapshot real-time listener
   let unsubscribeFirestore: Unsubscribe = () => {};
 
   try {
     const ordersCol = collection(db, 'orders');
-    const q = query(ordersCol, limit(150));
+    const q = query(ordersCol, limit(200));
 
     unsubscribeFirestore = onSnapshot(
       q,
       (snapshot) => {
-        isFirestoreActive = true;
         const firestoreOrders: Order[] = [];
         snapshot.forEach((docSnap) => {
           const data = docSnap.data();
@@ -148,12 +167,17 @@ export function subscribeToAllOrders(
           });
         });
 
-        // Merge with local orders in case any are pending sync
+        // Merge with local orders, giving precedence to Firestore data
         const localOrders = getLocalOrders();
         const mergedMap = new Map<string, Order>();
-        
+
+        // Seed with local orders
         localOrders.forEach((o) => mergedMap.set(o.id, o));
-        firestoreOrders.forEach((o) => mergedMap.set(o.id, o)); // firestore authoritative
+
+        // Overwrite or add Firestore orders
+        firestoreOrders.forEach((fo) => {
+          mergedMap.set(fo.id, fo);
+        });
 
         const mergedList = Array.from(mergedMap.values()).sort(
           (a, b) => (b.createdAt || 0) - (a.createdAt || 0)
@@ -163,7 +187,7 @@ export function subscribeToAllOrders(
         onUpdate(mergedList);
       },
       (err: FirestoreError) => {
-        console.warn('Firestore orders sync note (using local high-speed cache):', err.message);
+        console.warn('Firestore orders sync note (fallback to local cache):', err.message);
         onUpdate(getLocalOrders());
       }
     );
@@ -186,7 +210,6 @@ export function subscribeToAllOrders(
 export function subscribeToWaiterCalls(
   onUpdate: (calls: WaiterCall[]) => void
 ): Unsubscribe {
-  // Immediate cache update
   const initial = getLocalCalls();
   if (initial.length > 0) {
     onUpdate(initial);
@@ -207,7 +230,7 @@ export function subscribeToWaiterCalls(
 
   try {
     const callsCol = collection(db, 'waiterCalls');
-    const q = query(callsCol, limit(50));
+    const q = query(callsCol, limit(100));
 
     unsubscribeFirestore = onSnapshot(
       q,
@@ -265,6 +288,9 @@ export async function createOrderInFirestore(order: Omit<Order, 'id'>): Promise<
     ...order,
     id: orderId,
     tableNumber: Number(order.tableNumber),
+    customerPhone: order.customerPhone || '',
+    specialNotes: order.specialNotes || '',
+    createdAt: order.createdAt || Date.now(),
   };
 
   // Instant local save & broadcast (0ms UI latency)
@@ -272,15 +298,16 @@ export async function createOrderInFirestore(order: Omit<Order, 'id'>): Promise<
   saveLocalOrders([newOrder, ...existing]);
   emitLocalUpdate('orders');
 
-  // Async Firestore persistence
+  // Firestore persistence with clean data (no undefined fields)
   try {
     const orderDocRef = doc(db, 'orders', orderId);
-    await setDoc(orderDocRef, {
+    const cleanedPayload = cleanForFirestore({
       ...newOrder,
       serverCreatedAt: serverTimestamp(),
     });
+    await setDoc(orderDocRef, cleanedPayload);
   } catch (error) {
-    console.warn('Firestore background write notification:', error);
+    console.error('Firestore order write error:', error);
   }
 
   return orderId;
@@ -290,9 +317,10 @@ export async function createOrderInFirestore(order: Omit<Order, 'id'>): Promise<
  * Update order status (kitchen workflow)
  */
 export async function updateOrderStatus(orderId: string, newStatus: OrderStatus): Promise<void> {
+  const now = Date.now();
   // Update local cache immediately
   const locals = getLocalOrders().map((o) =>
-    o.id === orderId ? { ...o, status: newStatus, updatedAt: Date.now() } : o
+    o.id === orderId ? { ...o, status: newStatus, updatedAt: now } : o
   );
   saveLocalOrders(locals);
   emitLocalUpdate('orders');
@@ -302,7 +330,7 @@ export async function updateOrderStatus(orderId: string, newStatus: OrderStatus)
     const orderDocRef = doc(db, 'orders', orderId);
     await updateDoc(orderDocRef, {
       status: newStatus,
-      updatedAt: Date.now(),
+      updatedAt: now,
     });
   } catch (error) {
     console.warn('Firestore order status update note:', error);
@@ -329,10 +357,11 @@ export async function sendWaiterCall(tableNumber: number, reason: WaiterCall['re
 
   try {
     const callRef = doc(db, 'waiterCalls', callId);
-    await setDoc(callRef, {
+    const cleaned = cleanForFirestore({
       ...newCall,
       serverCreatedAt: serverTimestamp(),
     });
+    await setDoc(callRef, cleaned);
   } catch (error) {
     console.warn('Firestore waiter call save note:', error);
   }
@@ -344,8 +373,9 @@ export async function sendWaiterCall(tableNumber: number, reason: WaiterCall['re
  * Resolve a waiter call
  */
 export async function resolveWaiterCall(callId: string): Promise<void> {
+  const now = Date.now();
   const locals = getLocalCalls().map((c) =>
-    c.id === callId ? { ...c, status: 'resolved' as const, resolvedAt: Date.now() } : c
+    c.id === callId ? { ...c, status: 'resolved' as const, resolvedAt: now } : c
   );
   saveLocalCalls(locals);
   emitLocalUpdate('calls');
@@ -354,7 +384,7 @@ export async function resolveWaiterCall(callId: string): Promise<void> {
     const callRef = doc(db, 'waiterCalls', callId);
     await updateDoc(callRef, {
       status: 'resolved',
-      resolvedAt: Date.now(),
+      resolvedAt: now,
     });
   } catch (error) {
     console.warn('Firestore waiter call resolve note:', error);

@@ -37,6 +37,18 @@ export const KitchenDashboard: React.FC<KitchenDashboardProps> = ({
   const [activeTab, setActiveTab] = useState<'kanban' | 'history'>('kanban');
   const [filterTable, setFilterTable] = useState<number | 'all'>('all');
 
+  // Support ESC key to return to menu
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   // Active waiter calls
@@ -131,7 +143,7 @@ export const KitchenDashboard: React.FC<KitchenDashboardProps> = ({
             className={`px-3 py-1.5 rounded-lg border flex items-center gap-1.5 text-xs font-mono transition-colors ${
               soundEnabled
                 ? 'bg-emerald-800 border-emerald-600 text-emerald-100'
-                : 'bg-red-900/60 border-red-700 text-red-200'
+                : 'bg-red-900 border-red-700 text-red-200'
             }`}
             title="Activer/Désactiver les alertes sonores"
           >
@@ -189,10 +201,11 @@ export const KitchenDashboard: React.FC<KitchenDashboardProps> = ({
 
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
-            title="Fermer"
+            className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 shadow-xs"
+            title="Quitter la console et retourner au menu"
           >
-            <X className="w-5 h-5" />
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Retour Menu</span>
           </button>
         </div>
       </div>

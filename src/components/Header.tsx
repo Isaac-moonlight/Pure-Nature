@@ -5,7 +5,8 @@ import {
   Clock,
   ChevronDown,
   PhoneCall,
-  UtensilsCrossed
+  UtensilsCrossed,
+  ChefHat
 } from 'lucide-react';
 import { RESTAURANT_INFO, formatPrice } from '../data/restaurantData';
 import { Order } from '../types';
@@ -67,7 +68,16 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="font-medium text-emerald-800">En direct de la terrasse</span>
           <span className="hidden sm:inline text-gray-500">• {RESTAURANT_INFO.neighborhood}, Cotonou</span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <button
+            type="button"
+            onClick={onTriggerPinModal}
+            className="flex items-center gap-1.5 px-2.5 py-1 bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-lg text-[11px] font-semibold transition-colors shadow-xs"
+            title="Accès console service & cuisine"
+          >
+            <ChefHat className="w-3.5 h-3.5 text-emerald-700" />
+            <span>Console Service</span>
+          </button>
           <a
             href={`tel:${RESTAURANT_INFO.phone}`}
             className="flex items-center gap-1.5 text-gray-700 hover:text-emerald-700 transition-colors font-medium"

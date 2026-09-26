@@ -256,22 +256,51 @@ export default function App() {
     );
   }, [allOrders, currentTable]);
 
+  // Search normalizer: strips accents, punctuation, and handles french diacritics
+  const normalizeSearchText = (str: string): string => {
+    return str
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[’']/g, ' ')
+      .replace(/œ/g, 'oe')
+      .replace(/æ/g, 'ae')
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
   // Filtered menu items
   const filteredMenuItems = useMemo(() => {
+    const trimmedQuery = searchQuery.trim();
+    const hasSearch = trimmedQuery.length > 0;
+
     return MENU_ITEMS.filter((item) => {
-      if (activeCategory !== 'all' && item.category !== activeCategory) {
-        return false;
-      }
+      // Dietary tag filters
       if (tagFilter === 'special' && !item.isChefSpecial) return false;
       if (tagFilter === 'vegetarian' && !item.isVegetarian) return false;
       if (tagFilter === 'spicy' && !item.spicyLevel) return false;
 
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
-        const matchesName = item.name.toLowerCase().includes(query);
-        const matchesDesc = item.description.toLowerCase().includes(query);
-        const matchesIngr = item.ingredients.toLowerCase().includes(query);
-        return matchesName || matchesDesc || matchesIngr;
+      // When actively searching, search across the entire menu regardless of category
+      if (hasSearch) {
+        const normQuery = normalizeSearchText(trimmedQuery);
+        const searchTokens = normQuery.split(' ').filter(Boolean);
+
+        // Find category label for matching
+        const catObj = MENU_CATEGORIES.find((c) => c.id === item.category);
+        const catLabel = catObj ? catObj.label : '';
+
+        const targetData = normalizeSearchText(
+          `${item.name} ${item.description} ${item.ingredients} ${(item.tags || []).join(' ')} ${catLabel}`
+        );
+
+        // All search words must be matched
+        return searchTokens.every((token) => targetData.includes(token));
+      }
+
+      // When not searching, filter by active category
+      if (activeCategory !== 'all' && item.category !== activeCategory) {
+        return false;
       }
 
       return true;
@@ -479,6 +508,25 @@ export default function App() {
               );
             })}
           </div>
+
+          {/* Active Search Results Banner */}
+          {searchQuery.trim() && (
+            <div className="bg-emerald-50 border border-emerald-300 px-4 py-2 rounded-xl flex items-center justify-between text-xs text-emerald-900 shadow-xs">
+              <div className="flex items-center gap-2">
+                <Search className="w-4 h-4 text-emerald-700" />
+                <span>
+                  Résultats pour « <strong className="font-bold text-gray-900">{searchQuery}</strong> » : {filteredMenuItems.length} mets trouvé{filteredMenuItems.length > 1 ? 's' : ''} sur toute la carte
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="px-2.5 py-1 bg-white hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-lg font-semibold text-xs transition-colors"
+              >
+                Tout réafficher
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Menu Items Grid */}
@@ -537,7 +585,7 @@ export default function App() {
       )}
 
       {/* Footer */}
-      <RestaurantFooter />
+      <RestaurantFooter onOpenStaff={() => setIsPinModalOpen(true)} />
 
       {/* Mandatory Table Number Gate at Entry */}
       <TableEntryGateModal

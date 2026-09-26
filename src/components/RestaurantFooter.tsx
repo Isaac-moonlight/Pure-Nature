@@ -9,7 +9,11 @@ import {
 } from 'lucide-react';
 import { RESTAURANT_INFO } from '../data/restaurantData';
 
-export const RestaurantFooter: React.FC = () => {
+interface RestaurantFooterProps {
+  onOpenStaff?: () => void;
+}
+
+export const RestaurantFooter: React.FC<RestaurantFooterProps> = ({ onOpenStaff }) => {
   return (
     <footer className="bg-white border-t border-gray-200 text-gray-600 text-xs pt-10 pb-16 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
@@ -106,9 +110,20 @@ export const RestaurantFooter: React.FC = () => {
         <p>
           © {new Date().getFullYear()} {RESTAURANT_INFO.name} • Cotonou, République du Bénin. Tous droits réservés.
         </p>
-        <p>
-          Menu digital & commande directe à table
-        </p>
+        <div className="flex items-center gap-4">
+          <p>
+            Menu digital & commande directe à table
+          </p>
+          {onOpenStaff && (
+            <button
+              type="button"
+              onClick={onOpenStaff}
+              className="text-gray-500 hover:text-emerald-700 underline transition-colors"
+            >
+              Console Service
+            </button>
+          )}
+        </div>
       </div>
     </footer>
   );

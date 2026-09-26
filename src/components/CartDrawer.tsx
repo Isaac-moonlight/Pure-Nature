@@ -102,22 +102,22 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
       quantity: item.quantity,
       unitPrice: item.unitPrice,
       totalPrice: item.totalPrice,
-      sizeName: item.selectedSize?.name,
+      sizeName: item.selectedSize?.name || '',
       supplements: item.selectedSupplements.map((s) => s.name),
-      specialInstructions: item.specialInstructions || undefined,
+      specialInstructions: item.specialInstructions || '',
     }));
 
     try {
       const orderId = await createOrderInFirestore({
         tableNumber: Number(currentTable),
         customerName: customerName.trim() || `Client Table ${currentTable}`,
-        customerPhone: customerPhone.trim() || undefined,
+        customerPhone: customerPhone.trim() || '',
         items: payloadItems,
         totalAmount,
         status: 'pending',
         paymentMethod,
         paymentStatus: 'pending',
-        specialNotes: specialNotes.trim() || undefined,
+        specialNotes: specialNotes.trim() || '',
         createdAt: Date.now(),
       });
 
@@ -141,7 +141,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/40 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex justify-end bg-gray-900 animate-in fade-in duration-200">
       <div className="bg-white border-l border-gray-200 w-full max-w-lg h-full flex flex-col shadow-2xl">
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
@@ -158,20 +158,29 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-700 rounded-lg transition-colors"
+            className="px-3 py-1.5 bg-white hover:bg-gray-100 text-gray-800 border border-gray-300 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 shadow-xs"
+            title="Retour au menu"
           >
-            <X className="w-5 h-5" />
+            <span>Retour au menu</span>
+            <X className="w-4 h-4 ml-1" />
           </button>
         </div>
 
         {/* Scrollable Items */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
           {cartItems.length === 0 ? (
-            <div className="py-16 text-center text-gray-400 space-y-3">
-              <p className="font-serif text-lg text-gray-700">Votre panier est vide</p>
-              <p className="text-xs max-w-xs mx-auto text-gray-500">
+            <div className="py-16 text-center text-gray-500 space-y-4">
+              <p className="font-serif text-lg text-gray-800">Votre panier est vide</p>
+              <p className="text-xs max-w-xs mx-auto text-gray-600">
                 Découvrez nos grillades de poissons du large, nos spécialités béninoises et nos jus pressés 100% naturels !
               </p>
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors"
+              >
+                Retour au menu principal
+              </button>
             </div>
           ) : (
             <div className="space-y-3">
@@ -377,7 +386,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               type="button"
               onClick={handleConfirmOrder}
               disabled={isSubmitting}
-              className="w-full py-3.5 bg-emerald-700 hover:bg-emerald-800 active:scale-95 text-white font-semibold text-sm sm:text-base rounded-xl transition-all flex items-center justify-center gap-2 shadow-xs disabled:opacity-50"
+              className="w-full py-3.5 bg-emerald-700 hover:bg-emerald-800 active:scale-95 text-white font-semibold text-sm sm:text-base rounded-xl transition-all flex items-center justify-center gap-2 shadow-xs disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <>
