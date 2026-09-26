@@ -1,0 +1,6 @@
+{
+  "name": "Pure Nature Bénin",
+  "description": "Menu digital interactif, commande à table en direct et console cuisine en temps réel pour le restaurant Pure Nature à Cotonou, Bénin.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
